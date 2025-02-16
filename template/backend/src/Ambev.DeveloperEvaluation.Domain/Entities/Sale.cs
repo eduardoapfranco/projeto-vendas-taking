@@ -40,8 +40,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
                 BranchName = branchName,
                 CustomerId = customerId,
                 CustomerName = customerName,
-                IsCancelled = false,
-                _items = new List<SaleItem>()
+                IsCancelled = false
             };
         }
 

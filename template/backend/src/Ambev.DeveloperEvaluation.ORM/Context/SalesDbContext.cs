@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 
-namespace Ambev.DeveloperEvaluation.Infrastructure
+namespace Ambev.DeveloperEvaluation.ORM.Context
 {
     public class SalesDbContext : DbContext
     {
