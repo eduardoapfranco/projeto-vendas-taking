@@ -3,11 +3,9 @@ using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
 using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Common.Validation;
-using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.IoC;
 using Ambev.DeveloperEvaluation.ORM;
 using Ambev.DeveloperEvaluation.ORM.Context;
-using Ambev.DeveloperEvaluation.ORM.Repositories;
 using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -32,15 +30,18 @@ public class Program
             builder.AddBasicHealthChecks();
             builder.Services.AddSwaggerGen();
 
+            //builder.Services.AddDbContext<DefaultContext>(options =>
+            //    options.UseNpgsql(
+            //        builder.Configuration.GetConnectionString("DefaultConnection"),
+            //        b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
+            //    )
+            //);
             builder.Services.AddDbContext<DefaultContext>(options =>
-                options.UseNpgsql(
-                    builder.Configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
-                )
-            );
+    options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
 
-            builder.Services.AddScoped<ISaleRepository, SaleRepository>();
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddDbContext<SalesDbContext>(options =>
+                options.UseInMemoryDatabase("DeveloperEvaluationSales"));
+
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
 
@@ -55,7 +56,6 @@ public class Program
                     typeof(Program).Assembly
                 );
             });
-
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
