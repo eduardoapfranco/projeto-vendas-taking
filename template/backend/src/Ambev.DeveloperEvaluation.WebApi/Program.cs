@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Application;
+using Ambev.DeveloperEvaluation.Application.Sales.MappingProfiles;
 using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
 using Ambev.DeveloperEvaluation.Common.Security;
@@ -37,7 +38,7 @@ public class Program
             //    )
             //);
             builder.Services.AddDbContext<DefaultContext>(options =>
-    options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
+            options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
 
             builder.Services.AddDbContext<SalesDbContext>(options =>
                 options.UseInMemoryDatabase("DeveloperEvaluationSales"));
@@ -48,6 +49,8 @@ public class Program
             builder.RegisterDependencies();
 
             builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(ApplicationLayer).Assembly);
+            builder.Services.AddAutoMapper(typeof(SalesMappingProfile).Assembly);
+
 
             builder.Services.AddMediatR(cfg =>
             {

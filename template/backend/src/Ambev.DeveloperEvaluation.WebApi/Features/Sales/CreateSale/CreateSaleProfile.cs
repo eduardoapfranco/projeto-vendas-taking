@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
-using Ambev.DeveloperEvaluation.Application.Sales.CreateSale; 
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.Application.Sales.CreateSale;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
 {
@@ -7,11 +8,14 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
     {
         public CreateSaleProfile()
         {
-            // Mapeia o request para o comando que será manipulado pelo MediatR
+            // Mapeia o request para o comando
             CreateMap<CreateSaleRequest, CreateSaleCommand>();
 
-            // Converte o Guid retornado pelo handler para o response
-            CreateMap<Guid, CreateSaleResponse>().ConvertUsing(saleId => new CreateSaleResponse { SaleId = saleId });
+            // Adicione o mapeamento para os itens:
+            CreateMap<SaleItemDto, CreateSaleItemDto>();
+
+            CreateMap<Guid, CreateSaleResponse>()
+                .ConvertUsing(saleId => new CreateSaleResponse { SaleId = saleId });
         }
     }
 }
