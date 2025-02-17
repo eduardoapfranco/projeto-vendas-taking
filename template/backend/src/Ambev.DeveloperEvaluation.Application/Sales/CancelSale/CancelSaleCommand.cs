@@ -5,6 +5,6 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Commands
 {
     public class CancelSaleCommand : IRequest<bool>
     {
-        public Guid SaleId { get; set; }
+        public string SaleId { get; set; }
     }
 }

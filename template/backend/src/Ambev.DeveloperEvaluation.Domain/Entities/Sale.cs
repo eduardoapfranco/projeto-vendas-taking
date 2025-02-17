@@ -4,12 +4,12 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
     public class Sale
     {
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
         public string SaleNumber { get; private set; }
         public DateTime SaleDate { get; private set; }
-        public Guid BranchId { get; private set; }
+        public string BranchId { get; private set; }
         public string BranchName { get; private set; }
-        public Guid CustomerId { get; private set; }
+        public string CustomerId { get; private set; }
         public string CustomerName { get; private set; }
         public bool IsCancelled { get; private set; }
         private readonly List<SaleItem> _items;
@@ -20,13 +20,13 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             _items = new List<SaleItem>();
         }
 
-        public static Sale Create(string saleNumber, DateTime saleDate,
-                                  Guid branchId, string branchName,
-                                  Guid customerId, string customerName)
+        public static Sale Create(string idVenda, string saleNumber, DateTime saleDate,
+                                  string branchId, string branchName,
+                                  string customerId, string customerName)
         {
             return new Sale
             {
-                Id = Guid.NewGuid(),
+                Id = idVenda,
                 SaleNumber = saleNumber,
                 SaleDate = saleDate,
                 BranchId = branchId,
@@ -37,7 +37,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             };
         }
 
-        public void AddItem(Guid productId, string productName, decimal unitPrice, int quantity)
+        public void AddItem(string productId, string productName, decimal unitPrice, int quantity)
         {
             if (quantity > 20)
                 throw new DomainException("Não é permitido vender mais de 20 itens iguais.");
@@ -51,7 +51,7 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             decimal discountValue = unitPrice * quantity * discountPercentage;
             decimal total = (unitPrice * quantity) - discountValue;
 
-            var item = new SaleItem(Guid.NewGuid(), productId, productName, unitPrice, quantity, discountPercentage, total);
+            var item = new SaleItem(id, productId, productName, unitPrice, quantity, discountPercentage, total);
             _items.Add(item);
         }
 
@@ -61,11 +61,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         }
 
         // Novo método para atualizar a venda
-        public void UpdateSale(string saleNumber, DateTime saleDate, Guid branchId, string branchName, Guid customerId, string customerName)
+        public void UpdateSale(string idVenda, string saleNumber, DateTime saleDate, string branchId, string branchName, string customerId, string customerName)
         {
             if (IsCancelled)
                 throw new DomainException("Não é possível atualizar uma venda cancelada.");
-
+            Id = idVenda;
             SaleNumber = saleNumber;
             SaleDate = saleDate;
             BranchId = branchId;

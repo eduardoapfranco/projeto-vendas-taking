@@ -25,32 +25,34 @@ public class Program
             WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
             builder.AddDefaultLogging();
 
+            // Adiciona o serviço de CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-
             builder.AddBasicHealthChecks();
             builder.Services.AddSwaggerGen();
 
-            //builder.Services.AddDbContext<DefaultContext>(options =>
-            //    options.UseNpgsql(
-            //        builder.Configuration.GetConnectionString("DefaultConnection"),
-            //        b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
-            //    )
-            //);
+            // Configuração do DbContext usando InMemory para testes
             builder.Services.AddDbContext<DefaultContext>(options =>
-            options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
+                options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
 
             builder.Services.AddDbContext<SalesDbContext>(options =>
                 options.UseInMemoryDatabase("DeveloperEvaluationSales"));
 
-
             builder.Services.AddJwtAuthentication(builder.Configuration);
-
             builder.RegisterDependencies();
 
             builder.Services.AddAutoMapper(typeof(Program).Assembly, typeof(ApplicationLayer).Assembly);
             builder.Services.AddAutoMapper(typeof(SalesMappingProfile).Assembly);
-
 
             builder.Services.AddMediatR(cfg =>
             {
@@ -63,6 +65,10 @@ public class Program
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             var app = builder.Build();
+
+            // Aplica o middleware para CORS antes de outros middlewares
+            app.UseCors("AllowAll");
+
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
@@ -72,14 +78,10 @@ public class Program
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseBasicHealthChecks();
-
             app.MapControllers();
-
             app.Run();
         }
         catch (Exception ex)
