@@ -11,12 +11,10 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public decimal Total { get; private set; }
         public bool IsCancelled { get; private set; }
 
-        // Construtor privado para EF
+        // Construtor para EF
         private SaleItem() { }
 
-        public SaleItem(string id, string productId, string productName,
-                        decimal unitPrice, int quantity,
-                        decimal discountPercentage, decimal total)
+        public SaleItem(string id, string productId, string productName, decimal unitPrice, int quantity, decimal discountPercentage, decimal total)
         {
             Id = id;
             ProductId = productId;
@@ -27,8 +25,9 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             Total = total;
             IsCancelled = false;
         }
+    
 
-        public void CancelItem()
+public void CancelItem()
         {
             IsCancelled = true;
         }

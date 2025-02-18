@@ -6,7 +6,7 @@ using Ambev.DeveloperEvaluation.Domain.Entities;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
-    public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, Guid>
+    public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, string>
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -21,7 +21,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             _logger = logger;
         }
 
-        public async Task<Guid> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
+        public async Task<string> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
         {
             // Cria a venda
             var sale = Sale.Create(

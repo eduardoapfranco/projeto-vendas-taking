@@ -17,7 +17,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Context
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configura Sale e seus itens owned
             modelBuilder.Entity<Sale>(entity =>
             {
                 entity.HasKey(s => s.Id);
@@ -25,9 +24,12 @@ namespace Ambev.DeveloperEvaluation.ORM.Context
                 {
                     i.WithOwner().HasForeignKey("SaleId");
                     i.HasKey(x => x.Id);
+                    // Remova ou ajuste ValueGeneratedNever se não for necessário para string
                     i.Property(x => x.Id).ValueGeneratedNever();
                 });
             });
+
         }
+
     }
 }

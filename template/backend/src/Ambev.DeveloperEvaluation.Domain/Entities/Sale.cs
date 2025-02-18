@@ -1,5 +1,3 @@
-
-
 namespace Ambev.DeveloperEvaluation.Domain.Entities
 {
     public class Sale
@@ -12,21 +10,22 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         public string CustomerId { get; private set; }
         public string CustomerName { get; private set; }
         public bool IsCancelled { get; private set; }
-        private readonly List<SaleItem> _items;
+        private List<SaleItem> _items;
         public IReadOnlyCollection<SaleItem> Items => _items;
 
+        // Construtor para EF
         private Sale()
         {
             _items = new List<SaleItem>();
         }
 
-        public static Sale Create(string idVenda, string saleNumber, DateTime saleDate,
+        public static Sale Create(string saleNumber, DateTime saleDate,
                                   string branchId, string branchName,
                                   string customerId, string customerName)
         {
             return new Sale
             {
-                Id = idVenda,
+                Id = Guid.NewGuid().ToString(), 
                 SaleNumber = saleNumber,
                 SaleDate = saleDate,
                 BranchId = branchId,
@@ -39,27 +38,13 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public void AddItem(string productId, string productName, decimal unitPrice, int quantity)
         {
-            if (quantity > 20)
-                throw new DomainException("Não é permitido vender mais de 20 itens iguais.");
-
-            decimal discountPercentage = 0m;
-            if (quantity >= 10)
-                discountPercentage = 0.20m;
-            else if (quantity >= 4)
-                discountPercentage = 0.10m;
-
-            decimal discountValue = unitPrice * quantity * discountPercentage;
-            decimal total = (unitPrice * quantity) - discountValue;
-
-            var item = new SaleItem(id, productId, productName, unitPrice, quantity, discountPercentage, total);
-            _items.Add(item);
+            // Exemplo de lógica para adicionar item
+            var discountPercentage = quantity >= 10 ? 0.2m : (quantity >= 4 ? 0.1m : 0m);
+            var discountValue = unitPrice * quantity * discountPercentage;
+            var total = (unitPrice * quantity) - discountValue;
+            var newItem = new SaleItem(Guid.NewGuid().ToString(), productId, productName, unitPrice, quantity, discountPercentage, total);
+            _items.Add(newItem);
         }
-
-        public void CancelSale()
-        {
-            IsCancelled = true;
-        }
-
         // Novo método para atualizar a venda
         public void UpdateSale(string idVenda, string saleNumber, DateTime saleDate, string branchId, string branchName, string customerId, string customerName)
         {
@@ -72,6 +57,11 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             BranchName = branchName;
             CustomerId = customerId;
             CustomerName = customerName;
+        }
+
+        public void CancelSale()
+        {
+            IsCancelled = true;
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
             // Adicione o mapeamento para os itens:
             CreateMap<SaleItemDto, CreateSaleItemDto>();
 
-            CreateMap<Guid, CreateSaleResponse>()
+            CreateMap<string, CreateSaleResponse>()
                 .ConvertUsing(saleId => new CreateSaleResponse { SaleId = saleId });
         }
     }

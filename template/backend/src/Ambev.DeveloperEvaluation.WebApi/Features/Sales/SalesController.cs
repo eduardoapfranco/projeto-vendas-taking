@@ -36,14 +36,14 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
 
             // Mapeia o request para o comando de criação (definido na camada Application)
             var command = _mapper.Map<CreateSaleCommand>(request);
-            Guid saleId = await _mediator.Send(command);
+            string saleId = await _mediator.Send(command);
             var response = _mapper.Map<CreateSaleResponse>(saleId);
             return Ok(response);
         }
 
         // GET: api/sales/{id}
-        [HttpGet("{id:guid}")]
-        public async Task<IActionResult> GetById(Guid id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
         {
             var query = new GetSaleByIdQuery { SaleId = id };
             var saleDto = await _mediator.Send(query);
@@ -62,8 +62,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         }
 
         // PUT: api/sales/{id}
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSaleRequest request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateSaleRequest request)
         {
             if (request == null)
                 return BadRequest("Requisição inválida.");
@@ -76,8 +76,8 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
         }
 
         // PUT: api/sales/{id}/cancel
-        [HttpPut("{id:guid}/cancel")]
-        public async Task<IActionResult> Cancel(Guid id)
+        [HttpPut("{id}/cancel")]
+        public async Task<IActionResult> Cancel(string id)
         {
             var command = new CancelSaleCommand { SaleId = id };
             bool result = await _mediator.Send(command);
