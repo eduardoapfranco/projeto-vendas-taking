@@ -42,6 +42,16 @@ export interface SaleItemRequest {
   quantity: number;
 }
 
+export interface PaginatedSales {
+  items: Sale[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -50,9 +60,10 @@ export class SalesService {
 
   constructor(private http: HttpClient) { }
 
-  getSales(): Observable<Sale[]> {
-    return this.http.get<Sale[]>(this.apiUrl);
+  getSales(pageNumber: number = 1, pageSize: number = 10): Observable<PaginatedSales> {
+    return this.http.get<PaginatedSales>(`${this.apiUrl}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
   }
+  
 
   getSaleById(id: string): Observable<Sale> {
     return this.http.get<Sale>(`${this.apiUrl}/${id}`);

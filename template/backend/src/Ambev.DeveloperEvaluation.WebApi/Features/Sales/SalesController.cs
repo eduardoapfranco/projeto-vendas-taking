@@ -54,12 +54,12 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
 
         // GET: api/sales
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] GetSalesQuery query)
         {
-            var query = new GetSalesQuery();
             var salesList = await _mediator.Send(query);
             return Ok(salesList);
         }
+
 
         // PUT: api/sales/{id}
         [HttpPut("{id}")]

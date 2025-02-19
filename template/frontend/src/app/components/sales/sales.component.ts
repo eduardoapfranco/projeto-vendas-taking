@@ -80,16 +80,16 @@ export class SalesComponent implements OnInit {
   ngOnInit(): void {
     this.loadSales();
   }
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+  }
 
   loadSales(): void {
-    this.salesService.getSales().subscribe(
+    this.salesService.getSales(this.pageNumber, this.pageSize).subscribe(
       res => {
-        this.sales = res;
-        this.totalSales = res.length;
-        this.dataSource.data = res;
-        if (this.paginator) {
-          this.dataSource.paginator = this.paginator;
-        }
+        this.sales = res.items;        
+        this.totalSales = res.totalCount; 
+        this.dataSource.data = res.items; 
       },
       err => console.error('Erro ao carregar vendas', err)
     );
