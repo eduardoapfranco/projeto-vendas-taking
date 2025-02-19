@@ -25,7 +25,6 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
                 return false;
             }
 
-            // Suponha que sua entidade Sale tenha um método para atualizar os dados:
             sale.UpdateSale(request.SaleId ,request.SaleNumber, request.SaleDate, request.BranchId, request.BranchName, request.CustomerId, request.CustomerName);
 
             await _saleRepository.UpdateAsync(sale);

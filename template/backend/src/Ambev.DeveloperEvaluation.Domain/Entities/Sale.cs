@@ -38,10 +38,15 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
 
         public void AddItem(string productId, string productName, decimal unitPrice, int quantity)
         {
-            // Exemplo de lógica para adicionar item
-            var discountPercentage = quantity >= 10 ? 0.2m : (quantity >= 4 ? 0.1m : 0m);
-            var discountValue = unitPrice * quantity * discountPercentage;
-            var total = (unitPrice * quantity) - discountValue;
+            if (quantity > 20)
+                throw new DomainException("Não é permitido vender mais de 20 itens iguais.");
+
+            decimal discountPercentage = 0;
+            if (quantity >= 10) discountPercentage = 0.20m;
+            else if (quantity >= 4) discountPercentage = 0.10m;
+
+            decimal discountValue = (unitPrice * quantity) * discountPercentage;
+            decimal total = (unitPrice * quantity) - discountValue;
             var newItem = new SaleItem(Guid.NewGuid().ToString(), productId, productName, unitPrice, quantity, discountPercentage, total);
             _items.Add(newItem);
         }
