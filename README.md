@@ -13,9 +13,8 @@ Este projeto é uma avaliação para candidatos à vaga de desenvolvedor sênior
   - [Frontend (Angular)](#frontend-angular)
 - [Testes](#testes)
 - [Regras de Negócio](#regras-de-negócio)
-- [Publicação de Eventos](#publica%C3%A7%C3%A3o-de-eventos)
-- [Contribuição](#contribui%C3%A7%C3%A3o)
-- [Licença](#licen%C3%A7a)
+- [Publicação de Eventos](#publicaçãode-eventos)
+- [Licença](#licença)
 
 ## Visão Geral
 
@@ -41,7 +40,7 @@ O sistema de vendas permite:
   - Validação de quantidade de itens.
   - Cálculo de descontos e totais.
 - **Publicação de Eventos:**  
-  - Eventos como **SaleCreated**, **SaleUpdated** e **SaleCancelled** são simulados no backend (através de logs) e também exibidos no frontend.
+  - Operações que alteram o estado da venda (criação, atualização e cancelamento) publicam eventos via Rebus, possibilitando integração com outros sistemas ou auditoria.
 - **Testes:**  
   - Testes unitários com xUnit e NSubstitute.
   - Testes de integração utilizando WebApplicationFactory.
@@ -58,6 +57,7 @@ O sistema de vendas permite:
   - PostgreSQL (produção) / InMemory (para testes)
   - MediatR (padrão Mediator)
   - AutoMapper
+  - Rebus (publicação e consumo de eventos)
   - xUnit, NSubstitute (testes)
   - Serilog (logging)
 
@@ -70,8 +70,8 @@ O sistema de vendas permite:
 
 O projeto está organizado em camadas, seguindo os princípios do Domain-Driven Design (DDD):
 
-- **Domain:** Entidades e regras de negócio (ex.: `Sale`, `SaleItem`).
-- **Application:** Comandos, queries, handlers, validações e mapeamentos.
+- **Domain:** Entidades e regras de negócio (ex.: `Sale`, `SaleItem`, `User`).
+- **Application:** Comandos, queries, handlers, validações, mapeamentos e eventos.
 - **ORM/Infrastructure:** Implementação do Entity Framework Core, repositórios e UnitOfWork.
 - **WebApi:** Controllers, configuração de endpoints REST, CORS e integração com a camada Application.
 - **Frontend:** Projeto Angular com componentes standalone para o CRUD de vendas.
@@ -89,7 +89,10 @@ O projeto está organizado em camadas, seguindo os princípios do Domain-Driven 
    - Abra o arquivo `appsettings.json` e configure a string de conexão e a chave JWT:
      ```json
      {
-       "DefaultConnection": "Host=localhost;Port=5432;Database=DeveloperEvaluation;Username=postgres;Password=SuaSenha;Trust Server Certificate=true",
+       "UseInMemoryDatabase": true,
+       "ConnectionStrings": {
+         "DefaultConnection": "Host=localhost;Port=5432;Database=DeveloperEvaluation;Username=postgres;Password=SuaSenha;Trust Server Certificate=true"
+       },
        "Jwt": {
          "SecretKey": "gKm4P/eA9qR2Tt8/5NbfM2k1uR7vXx+Z"
        },
@@ -103,10 +106,10 @@ O projeto está organizado em camadas, seguindo os princípios do Domain-Driven 
        "AllowedHosts": "*"
      }
      ```
-     > **Dica:** Utilize um SecretKey gerado aleatoriamente com pelo menos 32 bytes. O valor acima é apenas um exemplo; substitua-o por um valor seguro.
+     > **Dica:** Altere `"UseInMemoryDatabase": true` para `false` se desejar usar PostgreSQL e substitua `"SuaSenha"` pela senha correta.
 
 3. **Execução:**
-   - Compile e execute o projeto via Visual Studio ou CLI:
+   - Compile e execute o projeto:
      ```bash
      dotnet run
      ```
@@ -166,8 +169,31 @@ Essas regras são aplicadas no backend e refletidas no frontend.
 
 ## Publicação de Eventos
 
-- Eventos como **SaleCreated**, **SaleUpdated** e **SaleCancelled** são simulados no backend (através de logs)
+Este projeto utiliza o **Rebus** para publicar e consumir eventos relacionados às operações que alteram o estado da venda.  
+**Observação:** Operações de GET não publicam eventos, pois não alteram o estado.
 
-## Licença
+### Configuração do Rebus
+
+No `Program.cs`, o Rebus é configurado para usar um transporte InMemory (ideal para desenvolvimento e testes):
+
+```csharp
+using Rebus.Config;
+using Rebus.ServiceProvider;
+using Rebus.Transport.InMem;
+
+// ...
+
+builder.Services.AddRebus(configure => configure
+    .Logging(l => l.Console())
+    .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "myQueue"))
+);
+
+// Registra automaticamente os handlers do Rebus do assembly
+builder.Services.AutoRegisterHandlersFromAssemblyOf<SaleCreatedEventHandler>();
+
+// Após construir o app:
+app.Services.UseRebus();
+
+### Licença
 
 Este projeto está licenciado sob os termos da [MIT License](LICENSE).
