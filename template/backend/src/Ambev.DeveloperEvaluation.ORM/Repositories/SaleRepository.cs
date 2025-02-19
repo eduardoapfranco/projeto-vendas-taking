@@ -1,15 +1,14 @@
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.ORM.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories
 {
     public class SaleRepository : ISaleRepository
     {
-        private readonly SalesDbContext _context;
+        private readonly DefaultContext _context;
 
-        public SaleRepository(SalesDbContext context)
+        public SaleRepository(DefaultContext context)
         {
             _context = context;
         }

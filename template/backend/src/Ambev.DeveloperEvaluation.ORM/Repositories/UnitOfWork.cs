@@ -1,15 +1,14 @@
 
 
 using Ambev.DeveloperEvaluation.Domain.Repositories;
-using Ambev.DeveloperEvaluation.ORM.Context;
 
 namespace Ambev.DeveloperEvaluation.ORM.Repositories
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly SalesDbContext _context;
+        private readonly DefaultContext _context;
 
-        public UnitOfWork(SalesDbContext context)
+        public UnitOfWork(DefaultContext context)
         {
             _context = context;
         }

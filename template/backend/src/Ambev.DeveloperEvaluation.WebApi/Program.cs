@@ -6,7 +6,6 @@ using Ambev.DeveloperEvaluation.Common.Security;
 using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.IoC;
 using Ambev.DeveloperEvaluation.ORM;
-using Ambev.DeveloperEvaluation.ORM.Context;
 using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -22,10 +21,12 @@ public class Program
         {
             Log.Information("Starting web application");
 
-            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
             builder.AddDefaultLogging();
 
-            // Adiciona o serviço de CORS
+            bool useInMemoryDb = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", false);
+
+            // Adiciona CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
@@ -41,12 +42,20 @@ public class Program
             builder.AddBasicHealthChecks();
             builder.Services.AddSwaggerGen();
 
-            // Configuração do DbContext usando InMemory para testes
-            builder.Services.AddDbContext<DefaultContext>(options =>
-                options.UseInMemoryDatabase("DeveloperEvaluationUsers"));
-
-            builder.Services.AddDbContext<SalesDbContext>(options =>
-                options.UseInMemoryDatabase("DeveloperEvaluationSales"));
+            if (useInMemoryDb)
+            {
+                // Usa InMemory
+                builder.Services.AddDbContext<DefaultContext>(options =>
+                    options.UseInMemoryDatabase("DeveloperEvaluationContext"));
+            }
+            else
+            {
+                // Usa PostgreSQL
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+                builder.Services.AddDbContext<DefaultContext>(options =>
+                    options.UseNpgsql(connectionString, b =>
+                        b.MigrationsAssembly("Ambev.DeveloperEvaluation.WebApi")));
+            }
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.RegisterDependencies();
@@ -66,9 +75,7 @@ public class Program
 
             var app = builder.Build();
 
-            // Aplica o middleware para CORS antes de outros middlewares
             app.UseCors("AllowAll");
-
             app.UseMiddleware<ValidationExceptionMiddleware>();
 
             if (app.Environment.IsDevelopment())
