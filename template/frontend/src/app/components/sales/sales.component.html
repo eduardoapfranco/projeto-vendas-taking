@@ -1,0 +1,257 @@
+<mat-toolbar color="primary" class="header-toolbar">
+  <span class="header-title">Sistema de Vendas - Teste Fullstack</span>
+</mat-toolbar>
+
+<div class="content-container">
+  <!-- Cartão de Criação de Venda -->
+  <mat-card class="card">
+    <mat-card-title>Criar Nova Venda</mat-card-title>
+    <mat-card-content>
+      <form (ngSubmit)="addSale()">
+        <!-- Dados Básicos da Venda -->
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field full-width">
+            <mat-label>Número da Venda</mat-label>
+            <input matInput [(ngModel)]="newSale.saleNumber" name="saleNumber" required>
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field full-width">
+            <mat-label>Data da Venda</mat-label>
+            <input matInput type="date" [(ngModel)]="newSale.saleDate" name="saleDate" required>
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field half-width">
+            <mat-label>ID da Filial</mat-label>
+            <input matInput [(ngModel)]="newSale.branchId" name="branchId" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field half-width">
+            <mat-label>Nome da Filial</mat-label>
+            <input matInput [(ngModel)]="newSale.branchName" name="branchName" required>
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field half-width">
+            <mat-label>ID do Cliente</mat-label>
+            <input matInput [(ngModel)]="newSale.customerId" name="customerId" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field half-width">
+            <mat-label>Nome do Cliente</mat-label>
+            <input matInput [(ngModel)]="newSale.customerName" name="customerName" required>
+          </mat-form-field>
+        </div>
+        <!-- Itens da Venda -->
+        <div class="section">
+          <h3>Itens da Venda</h3>
+          <button mat-raised-button color="accent" type="button" (click)="addItem()">Adicionar Item</button>
+          <div *ngFor="let item of newSale.items; let i = index" class="item-card">
+            <h4>Item {{ i + 1 }}</h4>
+            <div class="form-row">
+              <mat-form-field appearance="fill" class="form-field half-width">
+                <mat-label>ID do Produto</mat-label>
+                <input matInput [(ngModel)]="item.productId" name="productId{{i}}" required>
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="form-field half-width">
+                <mat-label>Nome do Produto</mat-label>
+                <input matInput [(ngModel)]="item.productName" name="productName{{i}}" required>
+              </mat-form-field>
+            </div>
+            <div class="form-row">
+              <mat-form-field appearance="fill" class="form-field half-width">
+                <mat-label>Preço Unitário</mat-label>
+                <input matInput type="number" [(ngModel)]="item.unitPrice" name="unitPrice{{i}}" required>
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="form-field half-width">
+                <mat-label>Quantidade</mat-label>
+                <input matInput type="number" [(ngModel)]="item.quantity" name="quantity{{i}}" required>
+              </mat-form-field>
+            </div>
+            <div class="item-calculations" *ngIf="getItemDiscount(item) >= 0">
+              <p>Subtotal: {{ (item.unitPrice * item.quantity) | currency:'BRL':'symbol':'1.2-2' }}</p>
+              <p>Desconto Aplicado: {{ getItemDiscount(item) * 100 }}%</p>
+              <p>Valor do Desconto: {{ (item.unitPrice * item.quantity * getItemDiscount(item)) | currency:'BRL':'symbol':'1.2-2' }}</p>
+              <p>Total (com desconto): {{ getItemTotal(item) | currency:'BRL':'symbol':'1.2-2' }}</p>
+            </div>
+            <div class="error-msg" *ngIf="getItemDiscount(item) === -1">
+              Não é permitido vender mais de 20 itens iguais!
+            </div>
+            <button mat-button color="warn" type="button" (click)="removeItem(i)">Remover Item</button>
+          </div>
+        </div>
+        <div class="form-row">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isFormInvalid()">Criar Venda</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Seção para Pesquisar e Atualizar Venda -->
+  <mat-card class="card">
+    <mat-card-title>Pesquisar e Atualizar Venda</mat-card-title>
+    <mat-card-content>
+      <div class="form-row">
+        <mat-form-field appearance="fill" class="form-field full-width">
+          <mat-label>ID da Venda para Atualizar</mat-label>
+          <input matInput [(ngModel)]="searchSaleId" name="searchSaleId" required>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="button" (click)="searchSale()">Pesquisar</button>
+      </div>
+
+      <!-- Formulário de Atualização se a venda for encontrada -->
+      <div *ngIf="saleToUpdate" class="update-section">
+        <h3>Atualizar Venda</h3>
+        <form (ngSubmit)="updateSale()">
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field full-width">
+              <mat-label>Número da Venda</mat-label>
+              <input matInput [(ngModel)]="updateSaleData.saleNumber" name="updateSaleNumber" required>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field full-width">
+              <mat-label>Data da Venda</mat-label>
+              <input matInput type="date" [(ngModel)]="updateSaleData.saleDate" name="updateSaleDate" required>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field half-width">
+              <mat-label>ID da Filial</mat-label>
+              <input matInput [(ngModel)]="updateSaleData.branchId" name="updateBranchId" required>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field half-width">
+              <mat-label>Nome da Filial</mat-label>
+              <input matInput [(ngModel)]="updateSaleData.branchName" name="updateBranchName" required>
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field half-width">
+              <mat-label>ID do Cliente</mat-label>
+              <input matInput [(ngModel)]="updateSaleData.customerId" name="updateCustomerId" required>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field half-width">
+              <mat-label>Nome do Cliente</mat-label>
+              <input matInput [(ngModel)]="updateSaleData.customerName" name="updateCustomerName" required>
+            </mat-form-field>
+          </div>
+          <!-- Seção para atualizar os itens da venda -->
+          <div class="section">
+            <h4>Itens da Venda</h4>
+            <button mat-raised-button color="accent" type="button" (click)="addItemToUpdate()">Adicionar Item</button>
+            <div *ngFor="let item of updateSaleData.items; let i = index" class="item-card">
+              <h5>Item {{ i + 1 }}</h5>
+              <div class="form-row">
+                <mat-form-field appearance="fill" class="form-field half-width">
+                  <mat-label>ID do Produto</mat-label>
+                  <input matInput [(ngModel)]="item.productId" name="updateProductId{{i}}" required>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="form-field half-width">
+                  <mat-label>Nome do Produto</mat-label>
+                  <input matInput [(ngModel)]="item.productName" name="updateProductName{{i}}" required>
+                </mat-form-field>
+              </div>
+              <div class="form-row">
+                <mat-form-field appearance="fill" class="form-field half-width">
+                  <mat-label>Preço Unitário</mat-label>
+                  <input matInput type="number" [(ngModel)]="item.unitPrice" name="updateUnitPrice{{i}}" required>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="form-field half-width">
+                  <mat-label>Quantidade</mat-label>
+                  <input matInput type="number" [(ngModel)]="item.quantity" name="updateQuantity{{i}}" required>
+                </mat-form-field>
+              </div>
+              <button mat-button color="warn" type="button" (click)="removeItemFromUpdate(i)">Remover Item</button>
+            </div>
+          </div>
+          <div class="form-row">
+            <button mat-raised-button color="accent" type="submit">Atualizar Venda</button>
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Tabela de Vendas com Paginação -->
+  <mat-card class="card">
+    <mat-card-title>Lista de Vendas</mat-card-title>
+    <mat-card-content>
+      <!-- Container que permite scroll horizontal na tabela -->
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 full-width-table">
+          <!-- Coluna ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef> ID </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.id }} </td>
+          </ng-container>
+          <!-- Coluna Número -->
+          <ng-container matColumnDef="saleNumber">
+            <th mat-header-cell *matHeaderCellDef> Número </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.saleNumber }} </td>
+          </ng-container>
+          <!-- Coluna Data -->
+          <ng-container matColumnDef="saleDate">
+            <th mat-header-cell *matHeaderCellDef> Data </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.saleDate | date:'short' }} </td>
+          </ng-container>
+          <!-- Coluna Filial (oculta em telas muito pequenas, se desejar) -->
+          <ng-container matColumnDef="branchName" class="hide-on-small">
+            <th mat-header-cell *matHeaderCellDef> Filial </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.branchName }} </td>
+          </ng-container>
+          <!-- Coluna Cliente -->
+          <ng-container matColumnDef="customerName">
+            <th mat-header-cell *matHeaderCellDef> Cliente </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.customerName }} </td>
+          </ng-container>
+          <!-- Coluna Quantidade Total -->
+          <ng-container matColumnDef="totalQuantity">
+            <th mat-header-cell *matHeaderCellDef> Qtd Total </th>
+            <td mat-cell *matCellDef="let sale"> {{ getTotalQuantity(sale) }} </td>
+          </ng-container>
+          <!-- Coluna Valor Total (com desconto) -->
+          <ng-container matColumnDef="saleTotal">
+            <th mat-header-cell *matHeaderCellDef> Valor Total </th>
+            <td mat-cell *matCellDef="let sale"> {{ getSaleTotal(sale) | currency:'BRL':'symbol':'1.2-2' }} </td>
+          </ng-container>
+          <!-- Coluna Desconto Total -->
+          <ng-container matColumnDef="totalDiscount">
+            <th mat-header-cell *matHeaderCellDef> Desconto </th>
+            <td mat-cell *matCellDef="let sale"> {{ getTotalDiscount(sale) | currency:'BRL':'symbol':'1.2-2' }} </td>
+          </ng-container>
+          <!-- Coluna Status -->
+          <ng-container matColumnDef="isCancelled">
+            <th mat-header-cell *matHeaderCellDef> Status </th>
+            <td mat-cell *matCellDef="let sale"> {{ sale.isCancelled ? 'Cancelada' : 'Ativa' }} </td>
+          </ng-container>
+          <!-- Coluna Ações -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef> Ações </th>
+            <td mat-cell *matCellDef="let sale">
+              <button mat-button color="warn" (click)="cancelSale(sale.id)" [disabled]="sale.isCancelled">
+                Cancelar
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+      <mat-paginator [length]="totalSales"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="[5, 10, 20]"
+                     (page)="onPageChange($event)">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Seção de Eventos -->
+  <mat-card class="card">
+    <mat-card-title>Eventos</mat-card-title>
+    <mat-card-content>
+      <ul>
+        <li *ngFor="let evt of saleEvents">{{ evt }}</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+</div>

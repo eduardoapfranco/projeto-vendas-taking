@@ -1,86 +1,173 @@
-# Developer Evaluation Project
+# Projeto Vendas Taking
 
-`READ CAREFULLY`
+Este projeto é uma avaliação para candidatos à vaga de desenvolvedor sênior. Ele implementa um sistema de CRUD para vendas, com regras de negócio específicas, utilização de design patterns (como o Mediator), EF Core para ORM, testes unitários e de integração, além de um frontend Angular utilizando Angular Material.
 
-## Instructions
-**The test below will have up to 7 calendar days to be delivered from the date of receipt of this manual.**
+## Sumário
 
-- The code must be versioned in a public Github repository and a link must be sent for evaluation once completed
-- Upload this template to your repository and start working from it
-- Read the instructions carefully and make sure all requirements are being addressed
-- The repository must provide instructions on how to configure, execute and test the project
-- Documentation and overall organization will also be taken into consideration
+- [Visão Geral](#visão-geral)
+- [Funcionalidades](#funcionalidades)
+- [Tecnologias Utilizadas](#tecnologias-utilizadas)
+- [Estrutura do Projeto](#estrutura-do-projeto)
+- [Configuração e Execução](#configuração-e-execução)
+  - [Backend (.NET 8)](#backend-net-8)
+  - [Frontend (Angular)](#frontend-angular)
+- [Testes](#testes)
+- [Regras de Negócio](#regras-de-negócio)
+- [Publicação de Eventos](#publica%C3%A7%C3%A3o-de-eventos)
+- [Contribuição](#contribui%C3%A7%C3%A3o)
+- [Licença](#licen%C3%A7a)
 
-## Use Case
-**You are a developer on the DeveloperStore team. Now we need to implement the API prototypes.**
+## Visão Geral
 
-As we work with `DDD`, to reference entities from other domains, we use the `External Identities` pattern with denormalization of entity descriptions.
+O sistema de vendas permite:
 
-Therefore, you will write an API (complete CRUD) that handles sales records. The API needs to be able to inform:
+- **Criar, atualizar, consultar e cancelar vendas.**
+- Gerenciar itens de venda com regras de negócio:
+  - Compras abaixo de 4 itens não têm desconto.
+  - Compras com 4 a 9 itens têm desconto de 10%.
+  - Compras com 10 a 20 itens têm desconto de 20%.
+  - Não é permitido vender mais de 20 itens iguais.
+- **Paginação, filtragem e ordenação** da listagem de vendas.
+- Um frontend responsivo e intuitivo desenvolvido com Angular Material.
 
-* Sale number
-* Date when the sale was made
-* Customer
-* Total sale amount
-* Branch where the sale was made
-* Products
-* Quantities
-* Unit prices
-* Discounts
-* Total amount for each item
-* Cancelled/Not Cancelled
+## Funcionalidades
 
-It's not mandatory, but it would be a differential to build code for publishing events of:
-* SaleCreated
-* SaleModified
-* SaleCancelled
-* ItemCancelled
+- **CRUD de Vendas:**  
+  - Criação com adição dinâmica de itens.
+  - Atualização de dados da venda e dos itens.
+  - Consulta de vendas (por ID e listagem com paginação).
+  - Cancelamento de vendas.
+- **Regras de Negócio:**  
+  - Validação de quantidade de itens.
+  - Cálculo de descontos e totais.
+- **Publicação de Eventos:**  
+  - Eventos como **SaleCreated**, **SaleUpdated** e **SaleCancelled** são simulados no backend (através de logs) e também exibidos no frontend.
+- **Testes:**  
+  - Testes unitários com xUnit e NSubstitute.
+  - Testes de integração utilizando WebApplicationFactory.
+- **Configuração de Banco de Dados:**  
+  - Uso de PostgreSQL para produção e InMemory para testes.
+- **Autenticação JWT:**  
+  - Configuração preparada para autenticação (não obrigatório para este teste).
 
-If you write the code, **it's not required** to actually publish to any Message Broker. You can log a message in the application log or however you find most convenient.
+## Tecnologias Utilizadas
 
-### Business Rules
+- **Backend:**
+  - .NET 8.0
+  - Entity Framework Core (ORM)
+  - PostgreSQL (produção) / InMemory (para testes)
+  - MediatR (padrão Mediator)
+  - AutoMapper
+  - xUnit, NSubstitute (testes)
+  - Serilog (logging)
 
-* Purchases above 4 identical items have a 10% discount
-* Purchases between 10 and 20 identical items have a 20% discount
-* It's not possible to sell above 20 identical items
-* Purchases below 4 items cannot have a discount
+- **Frontend:**
+  - Angular 14+ (componentes standalone)
+  - Angular Material
+  - HTML, SCSS
 
-These business rules define quantity-based discounting tiers and limitations:
+## Estrutura do Projeto
 
-1. Discount Tiers:
-   - 4+ items: 10% discount
-   - 10-20 items: 20% discount
+O projeto está organizado em camadas, seguindo os princípios do Domain-Driven Design (DDD):
 
-2. Restrictions:
-   - Maximum limit: 20 items per product
-   - No discounts allowed for quantities below 4 items
+- **Domain:** Entidades e regras de negócio (ex.: `Sale`, `SaleItem`).
+- **Application:** Comandos, queries, handlers, validações e mapeamentos.
+- **ORM/Infrastructure:** Implementação do Entity Framework Core, repositórios e UnitOfWork.
+- **WebApi:** Controllers, configuração de endpoints REST, CORS e integração com a camada Application.
+- **Frontend:** Projeto Angular com componentes standalone para o CRUD de vendas.
 
-## Overview
-This section provides a high-level overview of the project and the various skills and competencies it aims to assess for developer candidates. 
+## Configuração e Execução
 
-See [Overview](/.doc/overview.md)
+### Backend (.NET 8)
 
-## Tech Stack
-This section lists the key technologies used in the project, including the backend, testing, frontend, and database components. 
+1. **Pré-requisitos:**
+   - .NET 8 SDK
+   - PostgreSQL (se for utilizar o banco real) ou InMemory para testes.
+   - Visual Studio 2022 ou VS Code.
 
-See [Tech Stack](/.doc/tech-stack.md)
+2. **Configuração:**
+   - Abra o arquivo `appsettings.json` e configure a string de conexão e a chave JWT:
+     ```json
+     {
+       "DefaultConnection": "Host=localhost;Port=5432;Database=DeveloperEvaluation;Username=postgres;Password=SuaSenha;Trust Server Certificate=true",
+       "Jwt": {
+         "SecretKey": "gKm4P/eA9qR2Tt8/5NbfM2k1uR7vXx+Z"
+       },
+       "Logging": {
+         "LogLevel": {
+           "Default": "Information",
+           "Microsoft": "Warning",
+           "Microsoft.Hosting.Lifetime": "Information"
+         }
+       },
+       "AllowedHosts": "*"
+     }
+     ```
+     > **Dica:** Utilize um SecretKey gerado aleatoriamente com pelo menos 32 bytes. O valor acima é apenas um exemplo; substitua-o por um valor seguro.
 
-## Frameworks
-This section outlines the frameworks and libraries that are leveraged in the project to enhance development productivity and maintainability. 
+3. **Execução:**
+   - Compile e execute o projeto via Visual Studio ou CLI:
+     ```bash
+     dotnet run
+     ```
+   - A API ficará disponível, por exemplo, em `https://localhost:7181`.
 
-See [Frameworks](/.doc/frameworks.md)
+### Frontend (Angular)
 
-<!-- 
-## API Structure
-This section includes links to the detailed documentation for the different API resources:
-- [API General](./docs/general-api.md)
-- [Products API](/.doc/products-api.md)
-- [Carts API](/.doc/carts-api.md)
-- [Users API](/.doc/users-api.md)
-- [Auth API](/.doc/auth-api.md)
--->
+1. **Pré-requisitos:**
+   - Node.js (versão LTS recomendada)
+   - Angular CLI
 
-## Project Structure
-This section describes the overall structure and organization of the project files and directories. 
+2. **Instalação:**
+   - Navegue até o diretório `template/frontend`:
+     ```bash
+     cd template/frontend
+     npm install
+     ```
 
-See [Project Structure](/.doc/project-structure.md)
+3. **Execução:**
+   - Inicie o servidor de desenvolvimento:
+     ```bash
+     ng serve
+     ```
+   - A aplicação estará disponível em `http://localhost:4200`.
+
+## Testes
+
+### Testes Unitários
+
+- **Backend:**
+  - Utilize xUnit e NSubstitute para rodar os testes.
+  - Execute:
+    ```bash
+    dotnet test
+    ```
+  - Os testes cobrem handlers, regras de negócio e repositórios (usando InMemory).
+
+### Testes de Integração
+
+- Utilize o WebApplicationFactory para testar os endpoints REST completos, verificando códigos de status e contratos da API.
+
+### Testes de Contrato
+
+- Implemente testes end-to-end para validar o formato das respostas e os contratos da API, se necessário.
+
+## Regras de Negócio
+
+- **Quantidade de Itens:**  
+  Não é permitido vender mais de 20 itens iguais.
+  
+- **Descontos:**  
+  - Quantidade < 4: 0% de desconto.  
+  - Quantidade entre 4 e 9: 10% de desconto.  
+  - Quantidade entre 10 e 20: 20% de desconto.
+
+Essas regras são aplicadas no backend e refletidas no frontend.
+
+## Publicação de Eventos
+
+- Eventos como **SaleCreated**, **SaleUpdated** e **SaleCancelled** são simulados no backend (através de logs)
+
+## Licença
+
+Este projeto está licenciado sob os termos da [MIT License](LICENSE).
