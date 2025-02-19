@@ -1,8 +1,9 @@
 using MediatR;
-using Microsoft.Extensions.Logging;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Domain.Entities;
-
+using Rebus.Bus;
+using Ambev.DeveloperEvaluation.Application.Sales.Events;
+using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
 {
@@ -10,16 +11,17 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<CreateSaleCommandHandler> _logger;
+        private readonly IMapper _mapper;
+        private readonly IBus _bus;
 
-        public CreateSaleCommandHandler(ISaleRepository saleRepository,
-                                        IUnitOfWork unitOfWork,
-                                        ILogger<CreateSaleCommandHandler> logger)
+        public CreateSaleCommandHandler(ISaleRepository saleRepository, IUnitOfWork unitOfWork, IMapper mapper, IBus bus)
         {
             _saleRepository = saleRepository;
             _unitOfWork = unitOfWork;
-            _logger = logger;
+            _mapper = mapper;
+            _bus = bus;
         }
+
 
         public async Task<string> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
         {
@@ -47,7 +49,7 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.CreateSale
             await _saleRepository.AddAsync(sale);
             await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Sale created with Id: {SaleId}", sale.Id);
+            await _bus.Publish(new SaleCreatedEvent(sale.Id, sale.SaleNumber));
 
             return sale.Id;
         }

@@ -1,6 +1,6 @@
 ﻿using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+using Rebus.Bus;
+using Ambev.DeveloperEvaluation.Application.Sales.Events;
 using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 
@@ -10,11 +10,14 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
     {
         private readonly ISaleRepository _saleRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBus _bus;
 
-        public UpdateSaleCommandHandler(ISaleRepository saleRepository, IUnitOfWork unitOfWork)
+
+        public UpdateSaleCommandHandler(ISaleRepository saleRepository, IUnitOfWork unitOfWork, IBus bus)
         {
             _saleRepository = saleRepository;
             _unitOfWork = unitOfWork;
+            _bus = bus;
         }
 
         public async Task<bool> Handle(UpdateSaleCommand request, CancellationToken cancellationToken)
@@ -29,6 +32,8 @@ namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
 
             await _saleRepository.UpdateAsync(sale);
             await _unitOfWork.CommitAsync();
+
+            await _bus.Publish(new SaleUpdatedEvent(sale.Id, sale.SaleNumber));
             return true;
         }
     }

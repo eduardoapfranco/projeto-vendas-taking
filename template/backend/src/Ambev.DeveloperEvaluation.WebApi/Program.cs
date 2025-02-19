@@ -1,4 +1,5 @@
 using Ambev.DeveloperEvaluation.Application;
+using Ambev.DeveloperEvaluation.Application.Sales.Handlers;
 using Ambev.DeveloperEvaluation.Application.Sales.MappingProfiles;
 using Ambev.DeveloperEvaluation.Common.HealthChecks;
 using Ambev.DeveloperEvaluation.Common.Logging;
@@ -10,6 +11,10 @@ using Ambev.DeveloperEvaluation.WebApi.Middleware;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Rebus.Transport.InMem;
+using Rebus.ServiceProvider;
+using Rebus.Config;
+
 
 namespace Ambev.DeveloperEvaluation.WebApi;
 
@@ -24,7 +29,7 @@ public class Program
             var builder = WebApplication.CreateBuilder(args);
             builder.AddDefaultLogging();
 
-            bool useInMemoryDb = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", false);
+            bool useInMemoryDb = builder.Configuration.GetValue<bool>("UseInMemoryDatabase", true);
 
             // Adiciona CORS
             builder.Services.AddCors(options =>
@@ -56,6 +61,16 @@ public class Program
                     options.UseNpgsql(connectionString, b =>
                         b.MigrationsAssembly("Ambev.DeveloperEvaluation.WebApi")));
             }
+
+            builder.Services.AddRebus(configure => configure
+            .Logging(l => l.Console())                     
+            .Transport(t => t.UseInMemoryTransport(new InMemNetwork(), "myQueue")) 
+        );
+
+
+            builder.Services.AutoRegisterHandlersFromAssemblyOf<SaleCreatedEventHandler>();
+            builder.Services.AutoRegisterHandlersFromAssemblyOf<SaleCancelledEventHandler>();
+            builder.Services.AutoRegisterHandlersFromAssemblyOf<SaleUpdatedEventHandler>();
 
             builder.Services.AddJwtAuthentication(builder.Configuration);
             builder.RegisterDependencies();
