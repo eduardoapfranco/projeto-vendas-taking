@@ -1,17 +1,126 @@
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
+/* Container centralizado e responsivo */
+.content-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 15px;
+}
+
+/* Cabeçalho */
+.header-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #1976d2;
+}
+
+.header-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Cartões */
+.card {
+  margin-bottom: 30px;
+  padding: 15px;
+  mat-card-title {
+    font-weight: 600;
   }
-  
-  .form-group {
+}
+
+/* Formulário */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+
+.form-field {
+  box-sizing: border-box;
+  padding-right: 15px;
+  margin-bottom: 15px; /* espaço entre campos quando empilhados */
+}
+
+.full-width {
+  flex: 1 1 100%;
+}
+
+.half-width {
+  flex: 1 1 48%;
+}
+
+/* Seção */
+.section {
+  margin-top: 20px;
+}
+
+/* Itens da Venda */
+.item-card {
+  background: #f9f9f9;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Tabela: permite scroll horizontal */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+.full-width-table {
+  width: 100%;
+  min-width: 600px; /* define um min-width para evitar a quebra em colunas */
+}
+
+/* Esconder colunas em telas muito pequenas (opcional) */
+.hide-on-small {
+  /* Por padrão, visível */
+}
+
+@media (max-width: 600px) {
+  .hide-on-small {
+    display: none !important;
+  }
+}
+
+/* Responsividade geral */
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 1.4rem;
+  }
+  .form-row {
+    flex-direction: column;
+  }
+  .half-width {
+    flex: 1 1 100%;
+    padding-right: 0;
+  }
+  .card {
     margin-bottom: 20px;
+    padding: 10px;
   }
-  
-  mat-card {
-    margin-bottom: 20px;
+  .item-card {
+    padding: 10px;
+    margin-top: 10px;
   }
-  
-  table {
-    width: 100%;
+}
+
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 1.2rem;
   }
-  
+  .card {
+    margin-bottom: 15px;
+    padding: 8px;
+  }
+  .item-card {
+    padding: 8px;
+    margin-top: 8px;
+  }
+  .form-field {
+    margin-bottom: 10px;
+  }
+}
